@@ -39,6 +39,10 @@ jobs:
             type=semver,pattern={{version}}-jdk11
             type=semver,pattern={{major}}.{{minor}}-jdk11
             type=sha
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=-jdk11
 
       # TODO need to make it parallel
       # TODO NTH define list of `docker buildx bake` targets only e.g. jdk11,jdk17,jdk18
@@ -63,6 +67,10 @@ jobs:
             type=semver,pattern={{version}}-jdk17
             type=semver,pattern={{major}}.{{minor}}-jdk17
             type=sha
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=-jdk17
       - name: Build JDK17 Gradle executor
         uses: docker/bake-action@v1
         with:
@@ -78,12 +86,15 @@ jobs:
         with:
           # TODO remove -dev after tests
           images: kubeshop/testkube-gradle-executor-dev
-          tags: |
-            type=ref,event=branch
+          tags: type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}-jdk18
-            type=semver,pattern={{major}}.{{minor}}-jdk18
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=sha
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=-jdk18
       - name: Build JDK18 Gradle executor
         uses: docker/bake-action@v1
         with:
