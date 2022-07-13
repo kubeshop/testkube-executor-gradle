@@ -89,7 +89,7 @@ jobs:
         with:
           # TODO remove -dev after tests
           images: kubeshop/testkube-gradle-executor-dev
-          tags: type=ref,event=branch
+          tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
@@ -107,5 +107,5 @@ jobs:
           files: |
             build/agent/docker-bake.hcl
             ${{ steps.meta_gradle_executor_jdk18.outputs.bake-file }}
-          targets: jdk11
+          targets: jdk18
           push: true
