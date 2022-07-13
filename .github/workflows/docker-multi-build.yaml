@@ -77,7 +77,7 @@ jobs:
           files: |
             build/agent/docker-bake.hcl
             ${{ steps.meta_gradle_executor_jdk17.outputs.bake-file }}
-          targets: jdk11
+          targets: jdk17
           push: true
 
       - name: Docker meta for Gradle executor JDK18

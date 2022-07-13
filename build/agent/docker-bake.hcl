@@ -28,7 +28,7 @@ target "jdk17" {
 target "jdk18" {
   inherits = ["docker-metadata-action"]
   context = "./"
-  dockerfile = "build/agent/Dockerfile.jdk17"
+  dockerfile = "build/agent/Dockerfile.jdk18"
   platforms = [
     "linux/amd64",
   ]
