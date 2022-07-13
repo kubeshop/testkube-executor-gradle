@@ -1,4 +1,3 @@
-// docker-bake.hcl is run from root directory so part
 target "docker-metadata-action" {}
 
 group "default" {
