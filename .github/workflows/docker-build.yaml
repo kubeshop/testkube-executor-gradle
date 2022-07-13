@@ -53,6 +53,34 @@ jobs:
           targets: jdk11
           push: true
 
+      # JDK 8
+
+      - name: Docker meta for Gradle executor JDK8
+        id: meta_gradle_executor_jdk8
+        uses: docker/metadata-action@v3
+        with:
+          images: kubeshop/testkube-gradle-executor
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=-jdk8
+
+      - name: Build JDK8 Gradle executor
+        uses: docker/bake-action@v1
+        with:
+          files: |
+            build/agent/docker-bake.hcl
+            ${{ steps.meta_gradle_executor_jdk8.outputs.bake-file }}
+          targets: jdk8
+          push: true
+
       # JDK 11
 
       - name: Docker meta for Gradle executor JDK11
