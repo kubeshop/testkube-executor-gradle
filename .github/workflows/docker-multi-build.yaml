@@ -36,8 +36,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}-jdk11
-            type=semver,pattern={{major}}.{{minor}}-jdk11
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=sha
           flavor: |
             latest=auto
@@ -64,8 +64,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}-jdk17
-            type=semver,pattern={{major}}.{{minor}}-jdk17
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=sha
           flavor: |
             latest=auto
