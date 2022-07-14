@@ -11,6 +11,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/output"
+	"github.com/kubeshop/testkube/pkg/process"
 )
 
 type Params struct {
@@ -79,6 +80,9 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		task := strings.Split(execution.TestType, "/")[1]
 		args = append(args, task)
 	}
+
+	out, _ := process.ExecuteInDir(directory, "ls", "-la")
+	output.PrintEvent("Directory content", string(out))
 
 	output.PrintEvent("Running", directory, gradleCommand, args)
 	output, err := executor.Run(directory, gradleCommand, args...)
