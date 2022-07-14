@@ -3,6 +3,7 @@ package runner
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,10 +48,17 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	// check settings.gradle or settings.gradle.kts files exist
-	// TODO pass this path somehow from init-container it should be the RUNNER_DATADIR
-	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
+	directory := filepath.Join(r.params.Datadir, "repo")
 
 	output.PrintEvent("looking for settings.gradle[.kts] in", directory)
+
+	ls := []string{}
+	filepath.Walk("/data", func(path string, info fs.FileInfo, err error) error {
+		ls = append(ls, path)
+		return nil
+	})
+
+	output.PrintEvent("/data content", ls)
 
 	settingsGradle := filepath.Join(directory, "settings.gradle")
 	settingsGradleKts := filepath.Join(directory, "settings.gradle.kts")
@@ -110,6 +118,10 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 
 	junitReportPath := filepath.Join(directory, "build", "test-results", args[len(args)-1])
 	err = filepath.Walk(junitReportPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
 		if !info.IsDir() && filepath.Ext(path) == ".xml" {
 			suites, _ := junit.IngestFile(path)
 			for _, suite := range suites {
