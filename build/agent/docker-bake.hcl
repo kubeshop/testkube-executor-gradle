@@ -1,7 +1,7 @@
 target "docker-metadata-action" {}
 
 group "default" {
-    targets = ["jdk11","jdk17","jdk18"]
+    targets = ["jdk8","jdk11","jdk17","jdk18"]
 }
 
 target "jdk8" {
