@@ -48,7 +48,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	// check settings.gradle or settings.gradle.kts files exist
-	directory := filepath.Join(r.params.Datadir, "repo")
+	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
 
 	output.PrintEvent("looking for settings.gradle[.kts] in", directory)
 
