@@ -47,7 +47,9 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	// check settings.gradle or settings.gradle.kts files exist
-	directory := r.params.Datadir
+	// TODO pass this path somehow from init-container it should be the RUNNER_DATADIR
+	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
+
 	settingsGradle := filepath.Join(directory, "settings.gradle")
 	settingsGradleKts := filepath.Join(directory, "settings.gradle.kts")
 
