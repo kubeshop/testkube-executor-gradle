@@ -12,7 +12,6 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/output"
-	"github.com/kubeshop/testkube/pkg/process"
 )
 
 type Params struct {
@@ -50,16 +49,6 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	// check settings.gradle or settings.gradle.kts files exist
 	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
 
-	output.PrintEvent("looking for settings.gradle[.kts] in", directory)
-
-	ls := []string{}
-	filepath.Walk("/data", func(path string, info fs.FileInfo, err error) error {
-		ls = append(ls, path)
-		return nil
-	})
-
-	output.PrintEvent("/data content", ls)
-
 	settingsGradle := filepath.Join(directory, "settings.gradle")
 	settingsGradleKts := filepath.Join(directory, "settings.gradle.kts")
 
@@ -87,17 +76,22 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	args := []string{"--no-daemon"}
 	args = append(args, execution.Args...)
 
+	task := ""
 	if !strings.EqualFold(execution.TestType, "gradle/project") {
 		// then use the test subtype as task name
-		task := strings.Split(execution.TestType, "/")[1]
+		task = strings.Split(execution.TestType, "/")[1]
 		args = append(args, task)
 	}
 
-	out, _ := process.ExecuteInDir(directory, "ls", "-la")
-	output.PrintEvent("Directory content", string(out))
-
 	output.PrintEvent("Running", directory, gradleCommand, args)
-	output, err := executor.Run(directory, gradleCommand, args...)
+	out, err := executor.Run(directory, gradleCommand, args...)
+
+	ls := []string{}
+	filepath.Walk("/data", func(path string, info fs.FileInfo, err error) error {
+		ls = append(ls, path)
+		return nil
+	})
+	output.PrintEvent("/data content", ls)
 
 	if err == nil {
 		result.Status = testkube.ExecutionStatusPassed
@@ -113,10 +107,10 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		}
 	}
 
-	result.Output = string(output)
+	result.Output = string(out)
 	result.OutputType = "text/plain"
 
-	junitReportPath := filepath.Join(directory, "build", "test-results", args[len(args)-1])
+	junitReportPath := filepath.Join(directory, "build", "test-results")
 	err = filepath.Walk(junitReportPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -140,7 +134,11 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		return nil
 	})
 
-	return result, err
+	if err != nil {
+		return result.Err(err), nil
+	}
+
+	return result, nil
 }
 
 func mapStatus(in junit.Status) (out string) {
