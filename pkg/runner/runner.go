@@ -14,6 +14,8 @@ import (
 	"github.com/kubeshop/testkube/pkg/executor/output"
 )
 
+const EnvPrefix = "RUNNER_"
+
 type Params struct {
 	Datadir string // RUNNER_DATADIR
 }
@@ -41,9 +43,9 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		return result, err
 	}
 
-	// TODO design it better
+	// TODO design it better for now just append variables as envs
 	for _, env := range execution.Variables {
-		os.Setenv("TESTKUBE_"+env.Name, env.Value)
+		os.Setenv(EnvPrefix+env.Name, env.Value)
 	}
 
 	// the Gradle executor does not support files
