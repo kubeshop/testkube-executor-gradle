@@ -13,6 +13,6 @@ class LibraryTest {
         System.out.println();
         System.out.printf("JAVA: %s", System.getProperty("java.version"));
         System.out.println();
-        assertEquals(System.getProperty("java.version"), "18");
+        assertEquals(System.getProperty("java.version"), "18.0.1");
     }
 }
