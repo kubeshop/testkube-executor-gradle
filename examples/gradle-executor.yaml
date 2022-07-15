@@ -7,6 +7,6 @@ spec:
   executor_type: job
   image: testkube/testkube-gradle-executor:latest
   types:
-  - gradle/project
-  - gradle/test
-  - gradle/integrationTest
+    - gradle/project
+    - gradle/test
+    - gradle/integrationTest
