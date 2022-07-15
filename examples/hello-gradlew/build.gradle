@@ -13,3 +13,13 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+test {
+    reports {
+        html.enabled = false
+        junitXml{
+            enabled = true
+            outputPerTestCase = false
+        }
+    }
+}

@@ -24,7 +24,6 @@ tasks.named('test') {
 test {
     reports {
         html.enabled = false
-
         junitXml{
             enabled = true
             outputPerTestCase = false
