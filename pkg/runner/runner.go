@@ -41,6 +41,11 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		return result, err
 	}
 
+	// TODO design it better
+	for _, env := range execution.Variables {
+		os.Setenv("TESTKUBE_"+env.Name, env.Value)
+	}
+
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
 		return result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
