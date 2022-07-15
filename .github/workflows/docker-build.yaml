@@ -75,7 +75,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker meta for Gradle executor ${{ matrix.version }}
-        id: meta_gradle_executor_version
+        id: meta_gradle_executor_${{ matrix.version }}
         uses: docker/metadata-action@v3
         with:
           images: kubeshop/testkube-gradle-executor
@@ -95,6 +95,6 @@ jobs:
         with:
           files: |
             build/agent/docker-bake.hcl
-            ${{ steps.meta_gradle_executor_jdk18.outputs.bake-file }}
+            ${{ steps.meta_gradle_executor_${{ matrix.version }}.outputs.bake-file }}
           targets: ${{ matrix.version }}
           push: true
