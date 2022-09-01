@@ -12,6 +12,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/output"
+	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
 
 type Params struct {
@@ -42,6 +43,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	// TODO design it better for now just append variables as envs
+	secret.NewEnvManager().GetVars(execution.Variables)
 	for _, env := range execution.Variables {
 		os.Setenv(env.Name, env.Value)
 	}
