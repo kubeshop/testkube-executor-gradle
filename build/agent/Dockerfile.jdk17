@@ -10,4 +10,7 @@ RUN cd cmd/agent;go build -o /runner -mod mod -a .
 
 FROM gradle:7.4.2-jdk17
 COPY --from=builder /runner /bin/runner
+
+USER 1001
+
 ENTRYPOINT ["/bin/runner"]
