@@ -53,6 +53,12 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		return result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
 	}
 
+	// add configuration files
+	err = content.PlaceFiles(execution.CopyFiles)
+	if err != nil {
+		return result.Err(fmt.Errorf("could not place config files: %w", err)), nil
+	}
+
 	// check settings.gradle or settings.gradle.kts files exist
 	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
 
