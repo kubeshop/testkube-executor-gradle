@@ -11,6 +11,7 @@ import (
 	junit "github.com/joshdk/go-junit"
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
+	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
@@ -51,6 +52,12 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
 		return result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
+	}
+
+	// add configuration files
+	err = content.PlaceFiles(execution.CopyFiles)
+	if err != nil {
+		return result.Err(fmt.Errorf("could not place config files: %w", err)), nil
 	}
 
 	// check settings.gradle or settings.gradle.kts files exist
