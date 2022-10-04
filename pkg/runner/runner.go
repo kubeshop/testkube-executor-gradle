@@ -44,7 +44,8 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	// TODO design it better for now just append variables as envs
-	secret.NewEnvManager().GetVars(execution.Variables)
+	envManager := secret.NewEnvManagerWithVars(execution.Variables)
+	envManager.GetVars(execution.Variables)
 	for _, env := range execution.Variables {
 		os.Setenv(env.Name, env.Value)
 	}
@@ -97,7 +98,8 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	output.PrintEvent("Running task: "+task, directory, gradleCommand, args)
-	out, err := executor.Run(directory, gradleCommand, args...)
+	out, err := executor.Run(directory, gradleCommand, envManager, args...)
+	out = envManager.Obfuscate(out)
 
 	ls := []string{}
 	filepath.Walk("/data", func(path string, info fs.FileInfo, err error) error {
