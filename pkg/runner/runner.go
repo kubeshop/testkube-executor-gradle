@@ -90,8 +90,14 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 		args = append(args, task)
 	}
 
+	runPath := directory
+	if execution.Content.Repository != nil && execution.Content.Repository.WorkingDir != "" {
+		runPath = filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.WorkingDir)
+		args = append(args, "-p", directory)
+	}
+
 	output.PrintEvent("Running task: "+task, directory, gradleCommand, args)
-	out, err := executor.Run(directory, gradleCommand, envManager, args...)
+	out, err := executor.Run(runPath, gradleCommand, envManager, args...)
 	out = envManager.Obfuscate(out)
 
 	ls := []string{}
