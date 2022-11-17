@@ -10,6 +10,7 @@ target "jdk8" {
   dockerfile = "build/agent/Dockerfile.jdk8"
   platforms = [
     "linux/amd64",
+    "linux/arm64",
   ]
 }
 
@@ -19,6 +20,7 @@ target "jdk11" {
   dockerfile = "build/agent/Dockerfile.jdk11"
   platforms = [
     "linux/amd64",
+    "linux/arm64",
   ]
 }
 
@@ -28,6 +30,7 @@ target "jdk17" {
   dockerfile = "build/agent/Dockerfile.jdk17"
   platforms = [
     "linux/amd64",
+    "linux/arm64",
   ]
 }
 
@@ -38,5 +41,6 @@ target "jdk18" {
   dockerfile = "build/agent/Dockerfile.jdk18"
   platforms = [
     "linux/amd64",
+    "linux/arm64",
   ]
 }
