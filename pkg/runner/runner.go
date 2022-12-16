@@ -12,6 +12,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/output"
+	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
 
@@ -162,4 +163,9 @@ func mapStatus(in junit.Status) (out string) {
 	default:
 		return string(testkube.FAILED_ExecutionStatus)
 	}
+}
+
+// GetType returns runner type
+func (r *GradleRunner) GetType() runner.Type {
+	return runner.TypeMain
 }
