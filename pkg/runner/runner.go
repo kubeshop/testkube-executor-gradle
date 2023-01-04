@@ -45,8 +45,8 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 
 	// TODO design it better for now just append variables as envs
 	envManager := secret.NewEnvManagerWithVars(execution.Variables)
-	envManager.GetVars(execution.Variables)
-	for _, env := range execution.Variables {
+	envManager.GetVars(envManager.Variables)
+	for _, env := range envManager.Variables {
 		os.Setenv(env.Name, env.Value)
 	}
 
