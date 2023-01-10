@@ -14,6 +14,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
+	"github.com/kubeshop/testkube/pkg/ui"
 )
 
 type Params struct {
@@ -21,9 +22,14 @@ type Params struct {
 }
 
 func NewRunner() *GradleRunner {
+	output.PrintLog(fmt.Sprintf("%s Preparing test runner", ui.IconTruck))
+
+	output.PrintLog(fmt.Sprintf("%s Reading environment variables...", ui.IconWorld))
 	params := Params{
 		Datadir: os.Getenv("RUNNER_DATADIR"),
 	}
+	output.PrintLog(fmt.Sprintf("%s Environment variables read successfully", ui.IconCheckMark))
+	output.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.Datadir))
 
 	runner := &GradleRunner{
 		params: params,
@@ -40,6 +46,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	// check that the datadir exists
 	_, err = os.Stat(r.params.Datadir)
 	if errors.Is(err, os.ErrNotExist) {
+		output.PrintLog(fmt.Sprintf("%s Datadir %s does not exist", ui.IconCross, r.params.Datadir))
 		return result, err
 	}
 
@@ -52,7 +59,8 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
-		return result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
+		output.PrintLog(fmt.Sprintf("%s executor only supports git-dir based tests", ui.IconCross))
+		return result.Err(fmt.Errorf("executor only supports git-dir based tests")), nil
 	}
 
 	// check settings.gradle or settings.gradle.kts files exist
@@ -64,6 +72,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	_, settingsGradleErr := os.Stat(settingsGradle)
 	_, settingsGradleKtsErr := os.Stat(settingsGradleKts)
 	if errors.Is(settingsGradleErr, os.ErrNotExist) && errors.Is(settingsGradleKtsErr, os.ErrNotExist) {
+		output.PrintLog(fmt.Sprintf("%s no settings.gradle or settings.gradle.kts found", ui.IconCross))
 		return result.Err(fmt.Errorf("no settings.gradle or settings.gradle.kts found")), nil
 	}
 
@@ -109,8 +118,10 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	output.PrintEvent("/data content", ls)
 
 	if err == nil {
+		output.PrintLog(fmt.Sprintf("%s Test execution passed", ui.IconCheckMark))
 		result.Status = testkube.ExecutionStatusPassed
 	} else {
+		output.PrintLog(fmt.Sprintf("%s Test execution failed: %s", ui.IconCross, err.Error()))
 		result.Status = testkube.ExecutionStatusFailed
 		result.ErrorMessage = err.Error()
 		if strings.Contains(result.ErrorMessage, "exit status 1") {
@@ -128,6 +139,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	junitReportPath := filepath.Join(directory, "build", "test-results")
 	err = filepath.Walk(junitReportPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			output.PrintLog(fmt.Sprintf("%s Could not process reports: %s", ui.IconCross, err.Error()))
 			return err
 		}
 
