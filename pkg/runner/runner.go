@@ -43,6 +43,8 @@ type GradleRunner struct {
 }
 
 func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
+	output.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
+
 	// check that the datadir exists
 	_, err = os.Stat(r.params.Datadir)
 	if errors.Is(err, os.ErrNotExist) {
