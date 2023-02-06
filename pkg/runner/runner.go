@@ -62,7 +62,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
 		output.PrintLog(fmt.Sprintf("%s executor only supports git-dir based tests", ui.IconCross))
-		return result.Err(fmt.Errorf("executor only supports git-dir based tests")), nil
+		return *result.Err(fmt.Errorf("executor only supports git-dir based tests")), nil
 	}
 
 	// check settings.gradle or settings.gradle.kts files exist
@@ -75,7 +75,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	_, settingsGradleKtsErr := os.Stat(settingsGradleKts)
 	if errors.Is(settingsGradleErr, os.ErrNotExist) && errors.Is(settingsGradleKtsErr, os.ErrNotExist) {
 		output.PrintLog(fmt.Sprintf("%s no settings.gradle or settings.gradle.kts found", ui.IconCross))
-		return result.Err(fmt.Errorf("no settings.gradle or settings.gradle.kts found")), nil
+		return *result.Err(fmt.Errorf("no settings.gradle or settings.gradle.kts found")), nil
 	}
 
 	// determine the Gradle command to use
@@ -164,7 +164,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	})
 
 	if err != nil {
-		return result.Err(err), nil
+		return *result.Err(err), nil
 	}
 
 	return result, nil
