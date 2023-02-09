@@ -55,9 +55,6 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	// TODO design it better for now just append variables as envs
 	envManager := secret.NewEnvManagerWithVars(execution.Variables)
 	envManager.GetVars(envManager.Variables)
-	for _, env := range envManager.Variables {
-		os.Setenv(env.Name, env.Value)
-	}
 
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
@@ -85,11 +82,6 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	if err == nil {
 		// then we use the wrapper instead
 		gradleCommand = "./gradlew"
-	}
-
-	// simply set the ENVs to use during Gradle execution
-	for key, value := range execution.Envs {
-		os.Setenv(key, value)
 	}
 
 	// pass additional executor arguments/flags to Gradle
