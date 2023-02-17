@@ -11,9 +11,9 @@ import (
 	junit "github.com/joshdk/go-junit"
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
+	"github.com/kubeshop/testkube/pkg/executor/env"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
-	"github.com/kubeshop/testkube/pkg/executor/secret"
 	"github.com/kubeshop/testkube/pkg/ui"
 )
 
@@ -53,8 +53,8 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	}
 
 	// TODO design it better for now just append variables as envs
-	envManager := secret.NewEnvManagerWithVars(execution.Variables)
-	envManager.GetVars(envManager.Variables)
+	envManager := env.NewManagerWithVars(execution.Variables)
+	envManager.GetReferenceVars(envManager.Variables)
 
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
@@ -102,7 +102,7 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 
 	output.PrintEvent("Running task: "+task, directory, gradleCommand, args)
 	out, err := executor.Run(runPath, gradleCommand, envManager, args...)
-	out = envManager.Obfuscate(out)
+	out = envManager.ObfuscateSecrets(out)
 
 	ls := []string{}
 	filepath.Walk("/data", func(path string, info fs.FileInfo, err error) error {
