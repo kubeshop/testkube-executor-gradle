@@ -47,6 +47,10 @@ type GradleRunner struct {
 
 func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
 	output.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
+	err = r.Validate(execution)
+	if err != nil {
+		return result, err
+	}
 
 	// check that the datadir exists
 	_, err = os.Stat(r.params.Datadir)
@@ -58,18 +62,6 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	// TODO design it better for now just append variables as envs
 	envManager := env.NewManagerWithVars(execution.Variables)
 	envManager.GetReferenceVars(envManager.Variables)
-
-	contentType, err := r.fetcher.CalculateGitContentType(*execution.Content.Repository)
-	if err != nil {
-		output.PrintLog(fmt.Sprintf("%s can't detect git content type: %v", ui.IconCross, err))
-		return result, err
-	}
-
-	// the Gradle executor does not support files
-	if contentType != string(testkube.TestContentTypeGitDir) {
-		output.PrintLog(fmt.Sprintf("%s executor only supports git-dir based tests", ui.IconCross))
-		return *result.Err(fmt.Errorf("executor only supports git-dir based tests")), nil
-	}
 
 	// check settings.gradle or settings.gradle.kts files exist
 	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
@@ -183,4 +175,36 @@ func mapStatus(in junit.Status) (out string) {
 // GetType returns runner type
 func (r *GradleRunner) GetType() runner.Type {
 	return runner.TypeMain
+}
+
+// Validate checks if Execution has valid data in context of Gradle executor
+func (r *GradleRunner) Validate(execution testkube.Execution) error {
+
+	if execution.Content == nil {
+		output.PrintLog(fmt.Sprintf("%s Can't find any content to run in execution data", ui.IconCross))
+		return fmt.Errorf("can't find any content to run in execution data: %+v", execution)
+	}
+
+	if execution.Content.Repository == nil {
+		output.PrintLog(fmt.Sprintf("%s Gradle executor handles only repository based tests, but repository is nil", ui.IconCross))
+		return fmt.Errorf("gradle executor handles only repository based tests, but repository is nil")
+	}
+
+	if execution.Content.Repository.Branch == "" && execution.Content.Repository.Commit == "" {
+		output.PrintLog(fmt.Sprintf("%s Can't find branch or commit in params must use one or the other, repo %+v", ui.IconCross, execution.Content.Repository))
+		return fmt.Errorf("can't find branch or commit in params must use one or the other, repo:%+v", execution.Content.Repository)
+	}
+
+	contentType, err := r.fetcher.CalculateGitContentType(*execution.Content.Repository)
+	if err != nil {
+		output.PrintLog(fmt.Sprintf("%s Can't detect git content type: %+v", ui.IconCross, err))
+		return err
+	}
+
+	if contentType != string(testkube.TestContentTypeGitDir) {
+		output.PrintLog(fmt.Sprintf("%s passing gradle test as single file not implemented yet", ui.IconCross))
+		return fmt.Errorf("passing gradle test as single file not implemented yet")
+	}
+
+	return nil
 }
