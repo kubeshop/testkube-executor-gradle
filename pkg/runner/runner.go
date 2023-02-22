@@ -11,6 +11,7 @@ import (
 	junit "github.com/joshdk/go-junit"
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
+	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/env"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
@@ -32,14 +33,16 @@ func NewRunner() *GradleRunner {
 	output.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.Datadir))
 
 	runner := &GradleRunner{
-		params: params,
+		params:  params,
+		fetcher: content.NewFetcher(""),
 	}
 
 	return runner
 }
 
 type GradleRunner struct {
-	params Params
+	params  Params
+	fetcher content.ContentFetcher
 }
 
 func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
@@ -56,8 +59,14 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 	envManager := env.NewManagerWithVars(execution.Variables)
 	envManager.GetReferenceVars(envManager.Variables)
 
+	contentType, err := r.fetcher.CalculateGitContentType(*execution.Content.Repository)
+	if err != nil {
+		output.PrintLog(fmt.Sprintf("%s can't detect git content type: %v", ui.IconCross, err))
+		return result, err
+	}
+
 	// the Gradle executor does not support files
-	if execution.Content.IsFile() {
+	if contentType != string(testkube.TestContentTypeGitDir) {
 		output.PrintLog(fmt.Sprintf("%s executor only supports git-dir based tests", ui.IconCross))
 		return *result.Err(fmt.Errorf("executor only supports git-dir based tests")), nil
 	}
