@@ -11,7 +11,6 @@ import (
 	junit "github.com/joshdk/go-junit"
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
-	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/env"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
@@ -33,16 +32,14 @@ func NewRunner() *GradleRunner {
 	output.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.Datadir))
 
 	runner := &GradleRunner{
-		params:  params,
-		fetcher: content.NewFetcher(""),
+		params: params,
 	}
 
 	return runner
 }
 
 type GradleRunner struct {
-	params  Params
-	fetcher content.ContentFetcher
+	params Params
 }
 
 func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
@@ -65,6 +62,16 @@ func (r *GradleRunner) Run(execution testkube.Execution) (result testkube.Execut
 
 	// check settings.gradle or settings.gradle.kts files exist
 	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
+
+	fileInfo, err := os.Stat(directory)
+	if err != nil {
+		return result, err
+	}
+
+	if !fileInfo.IsDir() {
+		output.PrintLog(fmt.Sprintf("%s passing gradle test as single file not implemented yet", ui.IconCross))
+		return result, fmt.Errorf("passing gradle test as single file not implemented yet")
+	}
 
 	settingsGradle := filepath.Join(directory, "settings.gradle")
 	settingsGradleKts := filepath.Join(directory, "settings.gradle.kts")
@@ -193,17 +200,6 @@ func (r *GradleRunner) Validate(execution testkube.Execution) error {
 	if execution.Content.Repository.Branch == "" && execution.Content.Repository.Commit == "" {
 		output.PrintLog(fmt.Sprintf("%s Can't find branch or commit in params must use one or the other, repo %+v", ui.IconCross, execution.Content.Repository))
 		return fmt.Errorf("can't find branch or commit in params must use one or the other, repo:%+v", execution.Content.Repository)
-	}
-
-	contentType, err := r.fetcher.CalculateGitContentType(*execution.Content.Repository)
-	if err != nil {
-		output.PrintLog(fmt.Sprintf("%s Can't detect git content type: %+v", ui.IconCross, err))
-		return err
-	}
-
-	if contentType != string(testkube.TestContentTypeGitDir) {
-		output.PrintLog(fmt.Sprintf("%s passing gradle test as single file not implemented yet", ui.IconCross))
-		return fmt.Errorf("passing gradle test as single file not implemented yet")
 	}
 
 	return nil
