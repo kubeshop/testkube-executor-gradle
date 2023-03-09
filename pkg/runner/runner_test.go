@@ -72,11 +72,10 @@ func TestRunErrors(t *testing.T) {
 		execution.Content = testkube.NewStringTestContent("")
 
 		// when
-		result, err := runner.Run(*execution)
+		_, err := runner.Run(*execution)
 
 		// then
-		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusFailed)
+		assert.Error(t, err)
 	})
 
 	t.Run("no settings.gradle", func(t *testing.T) {
